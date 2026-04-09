@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight, CheckCircle2, Users, BarChart3, ShieldCheck, Clock, HelpCircle, ArrowRight, Sparkles, MessageSquare, Send, MessageCircle, Zap, FileText, X, TrendingUp, ScanLine, MapPin, ArrowUp } from "lucide-react";
+import { ChevronRight, CheckCircle2, Users, BarChart3, ShieldCheck, Clock, HelpCircle, ArrowRight, Sparkles, MessageSquare, Send, MessageCircle, Zap, FileText, X, TrendingUp, ScanLine, MapPin, ArrowUp, FileSpreadsheet, Download, Truck, Wallet } from "lucide-react";
 import { APP_CONTENT } from "../constants";
 import { useState, useEffect, useRef } from "react";
 import { DiagnosisModal } from "./DiagnosisModal";
+import { ChatBot } from "./ChatBot";
+import { DemoModal } from "./DemoModal";
 
 // --- Navbar ---
 export function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
@@ -169,7 +171,7 @@ export function Hero({ onOpenDiagnosis }: { onOpenDiagnosis: () => void }) {
 }
 
 // --- Stellar Feature ---
-export function StellarFeature() {
+export function StellarFeature({ onOpenDemo }: { onOpenDemo: (type: string, title: string) => void }) {
   return (
     <section className="bg-brand-navy py-24 text-white overflow-hidden relative">
       <div className="absolute top-0 right-0 -mr-20 -mt-20 h-96 w-96 rounded-full bg-brand-gold/10 blur-3xl" />
@@ -202,6 +204,15 @@ export function StellarFeature() {
                   <span className="text-sm font-medium text-slate-200">{feature}</span>
                 </div>
               ))}
+            </div>
+            <div className="mt-10">
+              <button 
+                onClick={() => onOpenDemo('facturacion', 'Facturación y Timbrado SAT')}
+                className="group flex items-center gap-3 rounded-2xl bg-brand-gold px-8 py-4 text-lg font-bold text-brand-navy transition-all hover:bg-white hover:scale-105 active:scale-95"
+              >
+                Probar Facturador Ahora
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
           </motion.div>
           
@@ -1216,9 +1227,77 @@ export function NextSteps({ onOpenDiagnosis, onSelectPackage }: { onOpenDiagnosi
   );
 }
 
+// --- Featured Functions ---
+export function FeaturedFunctions({ onOpenDemo }: { onOpenDemo: (type: string, title: string) => void }) {
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case "FileSpreadsheet": return <FileSpreadsheet className="h-8 w-8 text-brand-gold" />;
+      case "FileText": return <FileText className="h-8 w-8 text-brand-gold" />;
+      case "Download": return <Download className="h-8 w-8 text-brand-gold" />;
+      case "Users": return <Users className="h-8 w-8 text-brand-gold" />;
+      case "Truck": return <Truck className="h-8 w-8 text-brand-gold" />;
+      case "TrendingUp": return <TrendingUp className="h-8 w-8 text-brand-gold" />;
+      case "BarChart3": return <BarChart3 className="h-8 w-8 text-brand-gold" />;
+      case "Wallet": return <Wallet className="h-8 w-8 text-brand-gold" />;
+      default: return <Sparkles className="h-8 w-8 text-brand-gold" />;
+    }
+  };
+
+  const getDemoType = (title: string) => {
+    if (title.includes('Excel')) return 'excel';
+    if (title.includes('Facturador')) return 'facturacion';
+    return 'default';
+  };
+
+  return (
+    <section id="funciones-destacadas" className="bg-white py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="font-display text-4xl font-bold text-brand-navy md:text-5xl">
+            {APP_CONTENT.featuredFunctions.title}
+          </h2>
+          <p className="mt-6 text-lg text-slate-600">
+            {APP_CONTENT.featuredFunctions.subtitle}
+          </p>
+        </div>
+        
+        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {APP_CONTENT.featuredFunctions.items.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              onClick={() => onOpenDemo(getDemoType(item.title), item.title)}
+              className="group cursor-pointer rounded-3xl border border-slate-100 bg-slate-50 p-8 transition-all hover:bg-white hover:shadow-xl"
+            >
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-navy text-white transition-all group-hover:bg-brand-gold group-hover:text-brand-navy">
+                {getIcon(item.icon)}
+              </div>
+              <h3 className="text-xl font-bold text-brand-navy">{item.title}</h3>
+              <p className="mt-4 text-sm text-slate-600 leading-relaxed">
+                {item.description}
+              </p>
+              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-brand-navy opacity-0 transition-opacity group-hover:opacity-100">
+                Ver Demo <ArrowRight size={12} />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage({ onLoginClick, onSelectPackage }: { onLoginClick: () => void, onSelectPackage: (id: number) => void }) {
   const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [demoState, setDemoState] = useState<{ isOpen: boolean, type: string, title: string }>({
+    isOpen: false,
+    type: '',
+    title: ''
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1232,11 +1311,16 @@ export default function LandingPage({ onLoginClick, onSelectPackage }: { onLogin
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const openDemo = (type: string, title: string) => {
+    setDemoState({ isOpen: true, type, title });
+  };
+
   return (
     <div className="relative">
       <Navbar onLoginClick={onLoginClick} />
       <Hero onOpenDiagnosis={() => setIsDiagnosisOpen(true)} />
-      <StellarFeature />
+      <StellarFeature onOpenDemo={openDemo} />
+      <FeaturedFunctions onOpenDemo={openDemo} />
       <Philosophy />
       <Benefits onSelectPackage={onSelectPackage} />
       <InitialConfig />
@@ -1248,16 +1332,20 @@ export default function LandingPage({ onLoginClick, onSelectPackage }: { onLogin
       <Promise />
       <Footer />
 
+      <ChatBot />
+
       {/* Scroll to Top Button - Left Side */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
+            drag
+            dragMomentum={false}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 left-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-brand-navy text-white shadow-2xl transition-all hover:bg-brand-gold hover:text-brand-navy active:scale-90"
-            aria-label="Subir al inicio"
+            className="fixed bottom-8 left-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-brand-navy text-white shadow-2xl transition-all hover:bg-brand-gold hover:text-brand-navy active:scale-90 cursor-grab active:cursor-grabbing"
+            aria-label="Subir al inicio (Arrastra para mover)"
           >
             <ArrowUp className="h-6 w-6" />
           </motion.button>
@@ -1268,6 +1356,13 @@ export default function LandingPage({ onLoginClick, onSelectPackage }: { onLogin
         isOpen={isDiagnosisOpen} 
         onClose={() => setIsDiagnosisOpen(false)} 
         onSelectPackage={onSelectPackage}
+      />
+
+      <DemoModal 
+        isOpen={demoState.isOpen}
+        type={demoState.type}
+        title={demoState.title}
+        onClose={() => setDemoState({ ...demoState, isOpen: false })}
       />
     </div>
   );

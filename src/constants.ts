@@ -28,6 +28,52 @@ export const APP_CONTENT = {
       "Validación automática de RFC y CP"
     ]
   },
+  featuredFunctions: {
+    title: "Funciones Destacadas",
+    subtitle: "Todo lo que necesitas para una administración empresarial de alto nivel.",
+    items: [
+      {
+        title: "Estados de cuenta a Excel",
+        description: "Exporta tus movimientos bancarios directamente a formatos editables para análisis personalizados.",
+        icon: "FileSpreadsheet"
+      },
+      {
+        title: "Facturador Pro",
+        description: "Emisión masiva de facturas CFDI 4.0 con timbrado certificado y plantillas profesionales.",
+        icon: "FileText"
+      },
+      {
+        title: "Descarga de XML SAT",
+        description: "Sincronización automática para descargar todos tus comprobantes fiscales directamente del portal.",
+        icon: "Download"
+      },
+      {
+        title: "Control de Clientes",
+        description: "Gestión detallada de saldos, historial de cobranza y expedientes de clientes en un solo lugar.",
+        icon: "Users"
+      },
+      {
+        title: "Control de Proveedores",
+        description: "Administración de cuentas por pagar, validación de facturas y programación de egresos.",
+        icon: "Truck"
+      },
+      {
+        title: "Flujo de Efectivo",
+        description: "Visualización en tiempo real de tu liquidez y proyecciones de caja para anticipar decisiones.",
+        icon: "TrendingUp"
+      },
+      {
+        title: "Estados Financieros",
+        description: "Generación automática de Balance General y Estado de Resultados con un solo clic.",
+        icon: "BarChart3"
+      },
+      {
+        title: "Control de Gastos",
+        description: "Clasificación inteligente y monitoreo de egresos operativos por categorías y centros de costos.",
+        icon: "Wallet"
+      }
+    ]
+  },
   initialConfig: {
     title: "Configuración y Capacitación Inicial",
     subtitle: "Te acompañamos desde el primer clic para que domines tu contabilidad.",
