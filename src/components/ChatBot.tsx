@@ -4,8 +4,11 @@ import { Send, X, Bot, MessageCircle, Sparkles, Minimize2, Maximize2 } from "luc
 import { GoogleGenAI } from "@google/genai";
 import { APP_CONTENT } from "../constants";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (globalThis as any).process?.env?.GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+// Debug: log API key presence (never log the actual key)
+console.log("ChatBot: API key configured:", !!apiKey);
 
 export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,11 +19,6 @@ export function ChatBot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // If no API key is available, don't render the chatbot
-  if (!apiKey) {
-    return null;
-  }
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -63,6 +61,12 @@ export function ChatBot() {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+
+    if (!ai) {
+      setMessages(prev => [...prev, { role: 'ai', content: "⚠️ El asistente AI no está configurado. Contacta a soporte para activarlo." }]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const chatHistory = messages.map(m => ({
