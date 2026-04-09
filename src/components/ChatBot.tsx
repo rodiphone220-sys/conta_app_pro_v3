@@ -4,7 +4,8 @@ import { Send, X, Bot, MessageCircle, Sparkles, Minimize2, Maximize2 } from "luc
 import { GoogleGenAI } from "@google/genai";
 import { APP_CONTENT } from "../constants";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (globalThis as any).process?.env?.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,11 @@ export function ChatBot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // If no API key is available, don't render the chatbot
+  if (!apiKey) {
+    return null;
+  }
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -64,7 +70,7 @@ export function ChatBot() {
         parts: [{ text: m.content }]
       }));
 
-      const response = await ai.models.generateContent({
+      const response = await ai!.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
           ...chatHistory,
@@ -105,30 +111,30 @@ export function ChatBot() {
         <div className="relative">
           {/* Floating Animation Wrapper */}
           <motion.div
-            animate={{ 
+            animate={{
               y: [0, -15, 0],
               rotate: [0, 2, -2, 0]
             }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-navy shadow-[0_10px_40px_-10px_rgba(15,23,42,0.5)] border-2 border-brand-gold/30"
           >
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" 
-              alt="Asistente Pro" 
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+              alt="Asistente Pro"
               className="h-10 w-10"
               referrerPolicy="no-referrer"
             />
           </motion.div>
-          
+
           {/* Notification Badge */}
           <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-green text-[10px] font-bold text-white ring-2 ring-white">
             1
           </div>
-          
+
           {/* Tooltip */}
           <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-brand-navy shadow-xl border border-slate-100 hidden md:block">
             ¿Dudas fiscales? ¡Pregúntame!
@@ -141,10 +147,10 @@ export function ChatBot() {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 100, x: -50 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
-              y: 0, 
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
               x: 0,
               height: isMinimized ? '64px' : '500px'
             }}
@@ -163,13 +169,13 @@ export function ChatBot() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={() => setIsMinimized(!isMinimized)}
                   className="rounded-lg p-1.5 hover:bg-white/10 transition-colors"
                 >
                   {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
                 </button>
-                <button 
+                <button
                   onClick={() => setIsOpen(false)}
                   className="rounded-lg p-1.5 hover:bg-white/10 transition-colors"
                 >
@@ -181,7 +187,7 @@ export function ChatBot() {
             {/* Messages Area */}
             {!isMinimized && (
               <>
-                <div 
+                <div
                   ref={scrollRef}
                   className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50"
                 >
@@ -198,11 +204,10 @@ export function ChatBot() {
                             <Bot className="h-3 w-3" />
                           </div>
                         )}
-                        <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
-                          msg.role === 'user' 
-                            ? 'bg-brand-navy text-white rounded-tr-none' 
-                            : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
-                        }`}>
+                        <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${msg.role === 'user'
+                          ? 'bg-brand-navy text-white rounded-tr-none'
+                          : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
+                          }`}>
                           {msg.content}
                         </div>
                       </div>
@@ -237,7 +242,7 @@ export function ChatBot() {
                       placeholder="Escribe tu duda fiscal..."
                       className="flex-1 rounded-xl bg-slate-100 px-4 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-navy/20"
                     />
-                    <button 
+                    <button
                       onClick={handleSend}
                       disabled={isLoading || !input.trim()}
                       className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-navy text-white transition-all hover:bg-slate-800 active:scale-90 disabled:opacity-50"
